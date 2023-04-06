@@ -5,6 +5,7 @@ from todo import TodoDB
 from email_validator import validate_email, EmailNotValidError
 import re
 
+# DB 객체 생성, 연결
 db = TodoDB()
 db.connectToDatabase()
 
