@@ -30,25 +30,25 @@ class TodoDB:
         except Exception as e:
             print(e)
 
-    def readDatabase(self):
+    def readTodos(self):
         c = TodoDB.con.cursor()
         c.execute('SELECT * FROM tasks')
         res = c.fetchall()
         return res
 
-    def insertDatabase(self, values):
+    def insertTodo(self, values):
         c = TodoDB.con.cursor()
         c.execute('INSERT INTO tasks (todo_content, todo_date, todo_time, completed, reg_date)'
                   ' VALUES (?, ?, ?, ?, ?)', values)
         TodoDB.con.commit()
         return c.lastrowid
 
-    def deleteDatabase(self, id):
+    def deleteTodo(self, id):
         c = TodoDB.con.cursor()
         c.execute(f'DELETE FROM tasks WHERE id={id}')
         TodoDB.con.commit()
 
-    def updateDatabase(db, values):
+    def updateTodo(db, values):
         c = TodoDB.con.cursor()
         c.execute('UPDATE tasks SET todo_content=?, todo_date=?, todo_time=?,'
                   ' completed=? WHERE id=?', values)
@@ -72,4 +72,30 @@ class TodoDB:
     def updateTodoTime(self, args):
         c = TodoDB.con.cursor()
         c.execute('UPDATE tasks SET todo_time=? WHERE id=?', (args[1], args[0]))
+        TodoDB.con.commit()
+
+    def readUsers(self):
+        c = TodoDB.con.cursor()
+        c.execute('SELECT * FROM users')
+        res = c.fetchall()
+        return res
+
+    def insertUser(self, values):
+        c = TodoDB.con.cursor()
+        c.execute('INSERT INTO users (user_name, user_gender, '
+                  'user_id, user_pw, '
+                  'user_email, user_mobile, reg_date)'
+                  ' VALUES (?, ?, ?, ?, ?, ?, ?)', values)
+        TodoDB.con.commit()
+        return c.lastrowid
+
+    def deleteUser(self, id):
+        c = TodoDB.con.cursor()
+        c.execute(f'DELETE FROM users WHERE id={id}')
+        TodoDB.con.commit()
+
+    def updateUser(db, values):
+        c = TodoDB.con.cursor()
+        c.execute('UPDATE users SET user_name=?, user_gender=?, user_pw=?,'
+                  'user_email=?, user_mobile=? WHERE id=?', values)
         TodoDB.con.commit()
