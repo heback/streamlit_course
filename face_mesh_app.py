@@ -35,7 +35,7 @@ st.markdown(
 st.sidebar.title('Face Mesh Application using MediaPipe')
 st.sidebar.subheader('Parameters')
 
-@st.cache()
+@st.cache_data
 def image_resize(image, width=None, height=None, inter=cv2.INTER_AREA):
     # initialize the dimensions of the image to be resized and
     # grab the image size
@@ -77,10 +77,10 @@ if app_mode =='About App':
     """
     <style>
     [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-        width: 400px;
+        width: 300px;
     }
     [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-        width: 400px;
+        width: 300px;
         margin-left: -400px;
     }
     </style>
@@ -169,7 +169,7 @@ elif app_mode =='Run on Video':
     i = 0
     drawing_spec = mp_drawing.DrawingSpec(thickness=2, circle_radius=2)
 
-    kpi1, kpi2, kpi3 = st.beta_columns(3)
+    kpi1, kpi2, kpi3 = st.columns(3)
 
     with kpi1:
         st.markdown("**FrameRate**")

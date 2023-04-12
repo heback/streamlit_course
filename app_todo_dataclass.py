@@ -1,6 +1,6 @@
 import streamlit as st
 import datetime
-from todo import TodoDB
+from todo_row_factory import *
 # pip install email-validator
 from email_validator import validate_email, EmailNotValidError
 import re
@@ -75,13 +75,12 @@ if menu == '회원가입':
 
         users = db.readUsers()
         for user in users:
-
-            title = user[1]+'('+ user[3] + ')'
+            title = user['user_name']+'('+ user['user_id'] + ')'
             with st.expander(title):
-                st.write(f'{user[1]}({user[5]})')
-                st.write(f'{user[2]}')
-                st.write(f'{user[6]}')
-                st.write(f'{user[7][:19]}')
+                st.write(f"{user['user_name']}({user['user_email']})")
+                st.write(f"{user['user_gender']}")
+                st.write(f"{user['user_mobile']}")
+                st.write(f"{user['reg_date'][:19]}")
 
 
 elif menu == '할일':
@@ -126,40 +125,48 @@ elif menu == '할일':
 
     todos = db.readTodos()
     for todo in todos:
+        task = Task(
+            id=todo[0],
+            todo_content=todo[1],
+            todo_date=todo[2],
+            todo_time=todo[3],
+            completed=todo[4],
+            reg_date=todo[5]
+        )
         col1, col2, col3, col4, col5, col6 = st.columns([1,3,2,2,3,2])
         col1.checkbox(
-            str(todo[0]),
-            value=True if todo[4] else False,
+            str(task.id),
+            value=True if task.completed else False,
             on_change=change_state,
             label_visibility='collapsed',
-            args=(todo[0], False if todo[4] else True))
+            args=(task.id, False if task.completed else True))
         col2.text_input(
-            str(todo[0]),
-            value=todo[1],
+            str(task.id),
+            value=task.todo_content,
             on_change=change_content,
             label_visibility='collapsed',
-            args=(todo[0], 'content'+str(todo[0])),
-            key='content'+str(todo[0]))
+            args=(task.id, 'content'+str(task.id)),
+            key='content'+str(task.id))
         col3.date_input(
-            str(todo[0]),
-            value=datetime.datetime.strptime(todo[2], '%Y-%m-%d').date(),
+            str(task.id),
+            value=datetime.datetime.strptime(task.todo_date, '%Y-%m-%d').date(),
             on_change=change_date,
             label_visibility='collapsed',
-            args=(todo[0], 'date'+str(todo[0])),
-            key='date'+str(todo[0]))
+            args=(task.id, 'date'+str(task.id)),
+            key='date'+str(task.id))
         col4.time_input(
-            str(todo[0]),
-            value=datetime.datetime.strptime(todo[3], '%H:%M').time(),
+            str(task.id),
+            value=datetime.datetime.strptime(task.todo_time, '%H:%M').time(),
             on_change=change_time,
             label_visibility='collapsed',
-            args=(todo[0], 'time'+str(todo[0])),
-            key='time'+str(todo[0]))
-        col5.text(todo[5][0:19])
+            args=(task.id, 'time'+str(task.id)),
+            key='time'+str(task.id))
+        col5.text(task.reg_date[0:19])
         col6.button(
             '삭제',
             on_click=delete_todo,
-            args=(todo[0], ),
-            key='del' + str(todo[0])
+            args=(task.id, ),
+            key='del' + str(task.id)
             )
 
 elif menu == '통계':

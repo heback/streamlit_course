@@ -25,7 +25,7 @@ def detect_faces(our_image):
     # Draw rectangle around the faces
     for (x, y, w, h) in faces:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-    return img,faces
+    return img, faces
 
 
 def detect_eyes(our_image):
