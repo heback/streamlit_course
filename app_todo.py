@@ -95,7 +95,7 @@ elif menu == '할일':
     btn = st.button('추가')
 
     if btn:
-        db.insertDatabase((
+        db.insertTodo((
             todo_content,
             todo_date.strftime('%Y-%m-%d'),
             todo_time.strftime('%H:%M'),
