@@ -1,7 +1,7 @@
+# 설정에서 pyrebase5 를 찾아 설치
 import pyrebase
 
 #Configure and Connext to Firebase
-
 firebaseConfig = {'apiKey': "AIzaSyDm2HeGl3bApix5KsbhI8NOjdwXkhNTaJM",
                   'authDomain': "trialauth-7eea1.firebaseapp.com",
                   'databaseURL': "https://trialauth-7eea1.firebaseio.com",
