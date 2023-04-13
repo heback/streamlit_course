@@ -3,7 +3,7 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 
 # Setup
-cred = credentials.Certificate("serviceAccountKey.json")
+cred = credentials.Certificate("serviceAccount.json")
 firebase_admin.initialize_app(cred)
 
 db=firestore.client()
@@ -21,21 +21,21 @@ for doc in docs:
 
 # Query
 # Equal
-docs = db.collection('persons').where("age", "==", "52").get()
+docs = db.collection('persons').where(u"age", u"==", u"52").get()
 for doc in docs:
     print(doc.to_dict())
 
 # Greater than
-docs = db.collection('persons').where("age", ">", "22").get()
+docs = db.collection('persons').where(u"age", u">", u"22").get()
 for doc in docs:
     print(doc.to_dict())
 
 # Array contains
-docs = db.collection('persons').where("socials", "array_contains", "facebook").get()
+docs = db.collection('persons').where(u"socials", u"array_contains", u"facebook").get()
 for doc in docs:
     print(doc.to_dict())
 
 # In
-docs = db.collection('persons').where("address", "in", ["Milan", "London"]).get()
+docs = db.collection('persons').where(u"address", u"in", ["Milan", "London"]).get()
 for doc in docs:
     print(doc.to_dict())
