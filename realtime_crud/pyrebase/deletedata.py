@@ -1,13 +1,14 @@
 import pyrebase
 
-firebaseConfig={"apiKey": "AIzaSyBPhwfUTQqOwKq2xH9087gHEslqEQTSNro",
-    "authDomain": "pyrebaserealtimedbdemo.firebaseapp.com",
-    "databaseURL": "https://pyrebaserealtimedbdemo.firebaseio.com",
-    "projectId": "pyrebaserealtimedbdemo",
-    "storageBucket": "pyrebaserealtimedbdemo.appspot.com",
-    "messagingSenderId": "843349173643",
-    "appId": "1:843349173643:web:90ff345ff844aa89d5fb8e",
-    "measurementId": "G-DT093HRL5R"}
+firebaseConfig={
+    'apiKey': "AIzaSyDhCADzL0Pu6ljILrAiVckNs3BmXJqb-pU",
+    'authDomain': "flet-firebase-ced4d.firebaseapp.com",
+    'databaseURL': "https://flet-firebase-ced4d-default-rtdb.firebaseio.com",
+    'projectId': "flet-firebase-ced4d",
+    'storageBucket': "flet-firebase-ced4d.appspot.com",
+    'messagingSenderId': "570468785109",
+    'appId': "1:570468785109:web:008672c9c6e4e233007b5c"
+}
 
 firebase=pyrebase.initialize_app(firebaseConfig)
 
