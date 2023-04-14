@@ -3,7 +3,8 @@ import pyrebase
 
 
 #Configure and Connext to Firebase
-firebaseConfig = {'apiKey': "AIzaSyDm2HeGl3bApix5KsbhI8NOjdwXkhNTaJM",
+firebaseConfig = {
+    'apiKey': "AIzaSyDm2HeGl3bApix5KsbhI8NOjdwXkhNTaJM",
                   'authDomain': "trialauth-7eea1.firebaseapp.com",
                   'databaseURL': "https://trialauth-7eea1.firebaseio.com",
                   'projectId': "trialauth-7eea1",
