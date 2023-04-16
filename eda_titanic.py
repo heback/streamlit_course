@@ -1,6 +1,6 @@
 import streamlit as st
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
 import io
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -60,6 +60,16 @@ g = sns.FacetGrid(titanic, col='survived', row='class', hue='class')
 g.map(plt.hist, 'age', bins=20)
 g.add_legend()
 st.pyplot()
+
+st.text('승선지(embarked)와 객실 등급(pclass)에 따른 생존율(survived)')
+grid = sns.FacetGrid(titanic, row='embarked', height=2.2, aspect=1.6)
+# Pointplot으로 시각화, x: 객실 등급, y: 생존 여부, 색깔: 성별, x축 순서: [1, 2, 3], 색깔 순서: [남성, 여성]
+grid.map(sns.pointplot, x='pclass', y='survived', hue='sex', palette='deep', order = [1, 2, 3], hue_order = ["male", "female"])
+g.add_legend()
+st.pyplot()
+
+
+#############################################################################
 
 st.subheader('히스토그램')
 fig = plt.figure(figsize=(12, 6))
