@@ -12,15 +12,18 @@ mnu = st.sidebar.selectbox('선택', options=['타이타닉 분석','타이타�
 titanic = sns.load_dataset('titanic')
 
 if mnu == '타이타닉 분석':
+    st.text('타이타닉 데이터 샘플')
     st.write(titanic.head())
+
+    st.text('타이타닉 데이터 칼럼 목록')
     st.write(titanic.columns)
 
-    st.dataframe(titanic.head())
-
+    st.text('타이타닉 데이터 칼럼 상세 정보')
     buffer = io.StringIO()
     titanic.info(buf=buffer)
     st.text(buffer.getvalue())
 
+    st.text('데이터 전체 요약 정보')
     st.dataframe(titanic.describe(include='all'), use_container_width=True)
 
     st.text('객실 등급(pclass)에 따른 생존율 비교')
@@ -118,12 +121,16 @@ elif mnu == '타이타닉 시각화2':
     sns.pointplot(data=titanic, x='class', y='fare')
     st.pyplot(fig, clear_figure=True)
 
+
+    st.text('박스 플롯과 바이올린 플롯의 의미를 살펴볼 것')
+    st.image('https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fb0CIEt%2FbtqCy3Aazjb%2Femj6zXRBK6UBUc8iolba81%2Fimg.png')
+
     st.text('박스 플롯')
     plt.title('titanic pointplot(class)')
     sns.boxplot(data=titanic, x='class', y='age')
     st.pyplot(fig, clear_figure=True)
 
-    st.text('바이올린플롯')
+    st.text('바이올린 플롯')
     plt.title('titanic violinplot(class-age)')
     sns.violinplot(data=titanic, x='class', y='age')
     st.pyplot(fig, clear_figure=True)
@@ -139,7 +146,7 @@ elif mnu == '타이타닉 시각화2':
     plt.rcParams['font.family'] = fs
     plt.rcParams['font.size'] = 12
 
-    st.text('카운트플롯')
+    st.text('카운트 플롯')
     plt.title('titanic countplot(class)-가로')
     sns.countplot(data=titanic, x='class')
     st.pyplot(fig, clear_figure=True)
@@ -156,7 +163,11 @@ elif mnu == '타이타닉 시각화2':
     st.dataframe(df_class)
 
     fig1, ax1 = plt.subplots()
-    ax1.pie(titanic.value_counts('class').tolist(), labels=titanic.value_counts('class').index.tolist(), autopct='%1.1f%%')
+    explode = [0.1, 0, 0]
+    ax1.pie(titanic.value_counts('class').tolist(),
+            labels=titanic.value_counts('class').index.tolist(),
+            autopct='%.1f%%',
+            explode=explode)
     ax1.axis('equal')
     st.pyplot(fig1)
 

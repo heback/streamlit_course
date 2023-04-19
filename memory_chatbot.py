@@ -89,7 +89,7 @@ if API_O:
 
     # Create a ConversationEntityMemory object if not already created
     if 'entity_memory' not in st.session_state:
-        st.session_state.entity_memory = ConversationEntityMemory(llm=llm, k=K)
+        st.session_state.entity_memory = ConversationEntityMemory(llm=llm, k=200)
 
     # Create the ConversationChain object with the specified configuration
     Conversation = ConversationChain(

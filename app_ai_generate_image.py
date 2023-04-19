@@ -6,7 +6,13 @@ import requests, io
 
 
 def generate():
-    openai.api_key = "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"
+
+    # api_key 얻는 방법
+    # https://platform.openai.com/overview 접속
+    # login -> https://platform.openai.com/account/api-keys
+    # create new secret key 버튼 클릭
+
+    openai.api_key = "your key"
     user_prompt = st.session_state['prompt']
     user_prompt += "in style: " + st.session_state['img_style']
 
@@ -27,14 +33,20 @@ def generate():
         image = Image.open(io.BytesIO(response.content))
         st.text(str(i) + '번째 이미지')
         st.image(image=image)
-        i+=1
+        i += 1
 
 
-st.title('AI 이미지 생성기')
-st.text_input('프롬프트', key='prompt')
-st.number_input('이미지 개수', value=1, key='img_num')
-st.selectbox('이미지 크기', options=['256x256', '512x512', '1024x1024'], key='img_size')
-st.radio('이미지 스타일', options=['Realistic', 'Cartoon', '3D Illustration', 'Flat Art'], key='img_style')
-btn = st.button('생성')
-if btn:
-    generate()
+col1, col2 = st.columns(2)
+
+with col1:
+    st.title('AI 이미지 생성기')
+    st.text_input('프롬프트', key='prompt')
+    st.number_input('이미지 개수', value=1, key='img_num')
+    st.selectbox('이미지 크기', options=['256x256', '512x512', '1024x1024'], key='img_size')
+    st.radio('이미지 스타일', options=['Realistic', 'Cartoon', '3D Illustration', 'Flat Art'], key='img_style')
+    btn = st.button('생성')
+
+with col2:
+    if btn:
+        st.subheader('이미지 생성 결과')
+        generate()
