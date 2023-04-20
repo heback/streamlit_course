@@ -3,6 +3,34 @@ import io
 import streamlit as st
 import numpy as np
 import pandas as pd
+from datetime import datetime
+import calendar
+
+data_path = 'bike_sharing_demand/'
+train = pd.read_csv(data_path + 'train.csv', parse_dates=['datetime'])
+test = pd.read_csv(data_path + 'test.csv', parse_dates=['datetime'])
+submission = pd.read_csv(data_path + 'sampleSubmission.csv', parse_dates=['datetime'])
+
+train['year'] = train['datetime'].dt.year
+train['month'] = train['datetime'].dt.month
+train['day'] = train['datetime'].dt.day
+train['hour'] = train['datetime'].dt.hour
+train['minute'] = train['datetime'].dt.minute
+train['second'] = train['datetime'].dt.second
+train['date'] = train['datetime'].dt.date
+train['dayofweek'] = train['datetime'].dt.dayofweek
+train['season'] = train['season'].map({1: 'spring',
+                                       2: 'summer',
+                                       3: 'fall',
+                                       4: 'winter'})
+
+train['weather'] = train['weather'].map({1: 'clear',
+                                         2: 'mist, few clouds',
+                                         3: 'light snow, rain, thunderstorm',
+                                         4: 'heavy rain, thunderstorm, snow, fog'})
+train['weekday'] = train['date'].apply(
+    lambda date: calendar.day_name[datetime.combine(date, datetime.min.time()).weekday()]
+)
 
 st.title('Bike Sharing Demand')
 
@@ -31,12 +59,8 @@ if mnu == '설명':
     st.markdown('**count** - 총 대여수')
 
 elif mnu == 'EDA':
-    st.subheader('EDA')
 
-    data_path = 'bike_sharing_demand/'
-    train = pd.read_csv(data_path + 'train.csv')
-    test = pd.read_csv(data_path + 'test.csv')
-    submission = pd.read_csv(data_path + 'sampleSubmission.csv')
+    st.subheader('EDA')
 
     st.text('(훈련 데이터 shape, 테스트 데이터 shape)')
     st.text(f'({train.shape}), ({test.shape})')
@@ -60,38 +84,107 @@ elif mnu == 'EDA':
     test.info(buf = buffer)
     st.text(buffer.getvalue())
 
-    st.text('datetime을 연도, 월, 일, 시, 분, 초 생성')
-    train['date'] = train['datetime'].apply(lambda x:x.split()[0])
-    train['year'] = train['datetime'].apply(lambda x: x.split()[0].split('-')[0])
-    train['month'] = train['datetime'].apply(lambda x: x.split()[0].split('-')[1])
-    train['day'] = train['datetime'].apply(lambda x: x.split()[0].split('-')[2])
-    train['hour'] = train['datetime'].apply(lambda x: x.split()[1].split(':')[0])
-    train['minute'] = train['datetime'].apply(lambda x: x.split()[1].split(':')[1])
-    train['second'] = train['datetime'].apply(lambda x: x.split()[1].split(':')[2])
-    from datetime import datetime
-    import calendar
-    train['weekday'] = train['date'].apply(lambda dateString: calendar.day_name[datetime.strptime(dateString, '%Y-%m-%d').weekday()])
-    # print(list(calendar.day_name))
-    # ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
-    train['season'] = train['season'].map({1: 'spring',
-                                           2: 'summer',
-                                           3: 'fall',
-                                           4: 'winter'})
-
-    train['weather'] = train['weather'].map({1: 'clear',
-                                             2: 'mist, few clouds',
-                                             3: 'light snow, rain, thunderstorm',
-                                             4: 'heavy rain, thunderstorm, snow, fog'})
-    st.write(train.head())
-
-    st.text('date와 month 열 삭제')
-    train = train.drop(['date', 'month'], axis=1)
-
-    st.write(train.head())
-
 elif mnu == '시각화':
-    pass
+
+    import seaborn as sns
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+
+    mpl.rc('font', size=12)
+    st.write('count의 분포도')
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+    sns.histplot(train['count'], ax=axes[0])
+    sns.histplot(np.log(train['count']), ax=axes[1])
+    fig.set_size_inches(10, 5)
+    st.pyplot()
+    st.write('원본 count값의 분포가 왼쪽으로 많이 편향되어 있어서 로그변환을 통해 정규분포에 가깝게 만듦.')
+
+    st.write('년, 월, 일, 시간, 분, 초에 따른 대여량 평균치')
+    mpl.rc('font', size=15)
+    fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3)
+    fig.set_size_inches(18, 13)
+
+    sns.barplot(data=train, x="year", y="count", ax=ax1)
+    sns.barplot(data=train, x="month", y="count", ax=ax2)
+    sns.barplot(data=train, x="day", y="count", ax=ax3)
+    sns.barplot(data=train, x="hour", y="count", ax=ax4)
+    sns.barplot(data=train, x="minute", y="count", ax=ax5)
+    sns.barplot(data=train, x="second", y="count", ax=ax6)
+
+    ax1.set(title="Rental amounts by year")
+    ax2.set(title="Rental amounts by month")
+    ax3.set(title="Rental amounts by day")
+    ax4.set(title="Rental amounts by hour")
+
+    st.pyplot()
+
+    st.write('그래프를 해석하세요.')
+
+    st.write('시즌별, 시간별, 근무일/휴무일에 따른 대여량 평균치')
+    mpl.rc('font', size=15)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+    fig.set_size_inches(18, 13)
+
+    sns.boxplot(data=train, x='season', y='count', ax=ax1)
+    sns.boxplot(data=train, x='weather', y='count', ax=ax2)
+    sns.boxplot(data=train, x='holiday', y='count', ax=ax3)
+    sns.boxplot(data=train, x='workingday', y='count', ax=ax4)
+
+    ax1.set(title='BoxPlot on Count Across Season')
+    ax2.set(title='BoxPlot on Count Across Weather')
+    ax3.set(title='BoxPlot on Count Across Holiday')
+    ax4.set(title='BoxPlot on Count Across Working Day')
+
+    st.pyplot()
+
+    st.write('근무일, 공휴일, 요일, 계절, 날씨에 따른 시간대별 평균 대여 수량')
+    mpl.rc('font', size=8)
+    fig, axes = plt.subplots(nrows=5)
+    plt.tight_layout()
+    fig.set_size_inches(7, 13)
+
+    sns.pointplot(x='hour', y='count', data=train, hue='workingday', ax=axes[0])
+    sns.pointplot(x='hour', y='count', data=train, hue='holiday', ax=axes[1])
+    sns.pointplot(x='hour', y='count', data=train, hue='weekday', ax=axes[2])
+    sns.pointplot(x='hour', y='count', data=train, hue='season', ax=axes[3])
+    sns.pointplot(x='hour', y='count', data=train, hue='weather', ax=axes[4])
+    st.pyplot()
+
+    st.write('온도, 체감 온도, 픙속, 습도별 대여 수량 산점도 그래프')
+    mpl.rc('font', size=12)
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+    plt.tight_layout()
+    fig.set_size_inches(7, 6)
+    sns.regplot(x="temp", y="count", data=train, ax=ax1, scatter_kws={'alpha':0.2}, line_kws={'color':'blue'})
+    sns.regplot(x="atemp", y="count", data=train, ax=ax2, scatter_kws={'alpha': 0.2}, line_kws={'color': 'blue'})
+    sns.regplot(x="windspeed", y="count", data=train, ax=ax3, scatter_kws={'alpha':0.2}, line_kws={'color':'blue'})
+    sns.regplot(x="humidity", y="count", data=train, ax=ax4, scatter_kws={'alpha':0.2}, line_kws={'color':'blue'})
+    st.pyplot()
+
+    st.write('피처 간 상관관계 매트릭스')
+    corrMat = train[['temp', 'atemp', 'humidity', 'windspeed', 'count']].corr()
+    fig, ax = plt.subplots()
+    fig.set_size_inches(10, 10)
+    sns.heatmap(corrMat, annot=True)
+    ax.set(title='Heatmap of Numerical Data')
+    st.pyplot()
+
+    st.markdown('#### 분석 정리')
+    st.markdown('**1. 타깃값 변환:** 분포도 확인 결과 타깃값인 count가 0근처로 치우쳐 있으므로 로그변환하여 정규분포에 가깝게 만들어야한다. '
+             '마지막에 다시 지수변환해 count로 복원해야 한다.')
+    st.markdown('**2. ')
 
 elif mnu == '모델링':
-    pass
+
+    data_path = 'bike_sharing_demand/'
+    train = pd.read_csv(data_path + 'train.csv', parse_dates=['datetime'])
+    test = pd.read_csv(data_path + 'test.csv', parse_dates=['datetime'])
+    submission = pd.read_csv(data_path + 'sampleSubmission.csv', parse_dates=['datetime'])
+
+    st.markdown('#### 피처 엔지니어링')
+    st.write('이상치 제거')
+    train = train[train['weather']!=4]
+
+    
