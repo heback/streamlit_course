@@ -6,7 +6,7 @@ import pandas as pd
 
 st.title('Bike Sharing Demand')
 
-mnu = st.sidebar.selectbox('메뉴', options=['설명', 'EDA', 'MODELLING'])
+mnu = st.sidebar.selectbox('메뉴', options=['설명', 'EDA', '시각화', '모델링'])
 
 if mnu == '설명':
     st.subheader('설명')
@@ -29,6 +29,7 @@ if mnu == '설명':
     st.markdown('**casual** - 미등록 사용자 대여수')
     st.markdown('**registered** - 등록 사용자 대여수')
     st.markdown('**count** - 총 대여수')
+
 elif mnu == 'EDA':
     st.subheader('EDA')
 
@@ -89,5 +90,8 @@ elif mnu == 'EDA':
 
     st.write(train.head())
 
-elif mnu == 'MODELLING':
+elif mnu == '시각화':
+    pass
+
+elif mnu == '모델링':
     pass
