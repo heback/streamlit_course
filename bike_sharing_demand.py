@@ -184,7 +184,18 @@ elif mnu == '모델링':
     submission = pd.read_csv(data_path + 'sampleSubmission.csv', parse_dates=['datetime'])
 
     st.markdown('#### 피처 엔지니어링')
-    st.write('이상치 제거')
-    train = train[train['weather']!=4]
+    st.markdown('**이상치 제거**')
+    st.write('폭우, 번개 속에서 실제로 자전거를 대여했을 수도 있지만 이 한 건의 데이터가 머신러닝 훈련에 부정적 영향을 끼치기 때문에 제거하는 것이 좋습니다.')
+    train = train[train['weather'] != 4]
+    st.code("train = train[train['weather']!=4]")
+
+    st.markdown('**데이터 합치기**')
+    st.write('훈련 데이터와 테스트 데이터에 같은 피처 엔지니어링을 적용하기 위해 두 데이터를 합친다.')
+    all_data_temp = pd.concat([train, test], ignore_index=True)
+    st.code("all_data_temp = pd.concat([train, test])")
+
+    st.dataframe(all_data_temp)
+
+
 
     
