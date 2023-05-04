@@ -7,6 +7,7 @@ from langchain.chains.conversation.memory import ConversationEntityMemory
 from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
 from langchain.chat_models import ChatOpenAI
 
+# openai 에서 발급받은 api 키
 api_key = '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'
 
 
