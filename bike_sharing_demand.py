@@ -11,26 +11,29 @@ train = pd.read_csv(data_path + 'train.csv', parse_dates=['datetime'])
 test = pd.read_csv(data_path + 'test.csv', parse_dates=['datetime'])
 submission = pd.read_csv(data_path + 'sampleSubmission.csv', parse_dates=['datetime'])
 
-train['year'] = train['datetime'].dt.year
-train['month'] = train['datetime'].dt.month
-train['day'] = train['datetime'].dt.day
-train['hour'] = train['datetime'].dt.hour
-train['minute'] = train['datetime'].dt.minute
-train['second'] = train['datetime'].dt.second
-train['date'] = train['datetime'].dt.date
-train['dayofweek'] = train['datetime'].dt.dayofweek
-train['season'] = train['season'].map({1: 'spring',
-                                       2: 'summer',
-                                       3: 'fall',
-                                       4: 'winter'})
 
-train['weather'] = train['weather'].map({1: 'clear',
-                                         2: 'mist, few clouds',
-                                         3: 'light snow, rain, thunderstorm',
-                                         4: 'heavy rain, thunderstorm, snow, fog'})
-train['weekday'] = train['date'].apply(
-    lambda date: calendar.day_name[datetime.combine(date, datetime.min.time()).weekday()]
-)
+def feature_engineering():
+    train['year'] = train['datetime'].dt.year
+    train['month'] = train['datetime'].dt.month
+    train['day'] = train['datetime'].dt.day
+    train['hour'] = train['datetime'].dt.hour
+    train['minute'] = train['datetime'].dt.minute
+    train['second'] = train['datetime'].dt.second
+    train['date'] = train['datetime'].dt.date
+    train['dayofweek'] = train['datetime'].dt.dayofweek
+    train['season'] = train['season'].map({1: 'spring',
+                                           2: 'summer',
+                                           3: 'fall',
+                                           4: 'winter'})
+
+    train['weather'] = train['weather'].map({1: 'clear',
+                                             2: 'mist, few clouds',
+                                             3: 'light snow, rain, thunderstorm',
+                                             4: 'heavy rain, thunderstorm, snow, fog'})
+    train['weekday'] = train['date'].apply(
+        lambda date: calendar.day_name[datetime.combine(date, datetime.min.time()).weekday()]
+    )
+
 
 st.title('Bike Sharing Demand')
 
@@ -74,26 +77,55 @@ elif mnu == 'EDA':
 
     st.subheader('EDA')
 
-    st.text('(훈련 데이터 shape, 테스트 데이터 shape)')
+    st.markdown('- (훈련 데이터 shape, 테스트 데이터 shape)')
     st.text(f'({train.shape}), ({test.shape})')
 
-    st.text('훈련 데이터')
+    st.markdown('- 훈련 데이터')
     st.dataframe(train.head())
 
-    st.text('테스트 데이터')
+    st.markdown('- 피처 엔지니어링')
+    st.text('시각화에 적합한 형태로 피처 변환')
+    feature_engineering()
+    st.code('''
+    train['year'] = train['datetime'].dt.year
+    train['month'] = train['datetime'].dt.month
+    train['day'] = train['datetime'].dt.day
+    train['hour'] = train['datetime'].dt.hour
+    train['minute'] = train['datetime'].dt.minute
+    train['second'] = train['datetime'].dt.second
+    train['date'] = train['datetime'].dt.date
+    train['dayofweek'] = train['datetime'].dt.dayofweek
+    train['season'] = train['season'].map({1: 'spring',
+                                           2: 'summer',
+                                           3: 'fall',
+                                           4: 'winter'})
+    
+    train['weather'] = train['weather'].map({1: 'clear',
+                                             2: 'mist, few clouds',
+                                             3: 'light snow, rain, thunderstorm',
+                                             4: 'heavy rain, thunderstorm, snow, fog'})
+    train['weekday'] = train['date'].apply(
+        lambda date: calendar.day_name[datetime.combine(date, datetime.min.time()).weekday()]
+    )
+    ''')
+
+    st.markdown('- 수정된 훈련 데이터')
+    st.dataframe(train.head())
+
+    st.markdown('- 테스트 데이터')
     st.dataframe(test.head())
 
-    st.text('제출 데이터')
+    st.markdown('- 제출 데이터')
     st.dataframe(submission.head())
 
-    st.text('train.info()')
+    st.markdown('- train.info()')
     buffer = io.StringIO()
-    train.info(buf = buffer)
+    train.info(buf=buffer)
     st.text(buffer.getvalue())
 
     buffer.truncate(0) # 버퍼 비우기
-    st.text('test.info()')
-    test.info(buf = buffer)
+    st.markdown('- test.info()')
+    test.info(buf=buffer)
     st.text(buffer.getvalue())
 
 elif mnu == '시각화':
@@ -104,8 +136,14 @@ elif mnu == '시각화':
 
     st.set_option('deprecation.showPyplotGlobalUse', False)
 
+    feature_engineering()
+
+    st.subheader('시각화')
+
+    st.markdown('**:blue[그래프를 해석하세요.]**')
+
     mpl.rc('font', size=12)
-    st.write('count의 분포도')
+    st.markdown('- count의 분포도')
     fig, axes = plt.subplots(nrows=1, ncols=2)
     sns.histplot(train['count'], ax=axes[0])
     sns.histplot(np.log(train['count']), ax=axes[1])
@@ -113,7 +151,7 @@ elif mnu == '시각화':
     st.pyplot()
     st.write('원본 count값의 분포가 왼쪽으로 많이 편향되어 있어서 로그변환을 통해 정규분포에 가깝게 만듦.')
 
-    st.write('년, 월, 일, 시간, 분, 초에 따른 대여량 평균치')
+    st.markdown('- 년, 월, 일, 시간, 분, 초에 따른 대여량 평균치')
     mpl.rc('font', size=15)
     fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3)
     fig.set_size_inches(18, 13)
@@ -132,9 +170,7 @@ elif mnu == '시각화':
 
     st.pyplot()
 
-    st.write('그래프를 해석하세요.')
-
-    st.write('시즌별, 시간별, 근무일/휴무일에 따른 대여량 평균치')
+    st.markdown('- 시즌별, 시간별, 근무일/휴무일에 따른 대여량 평균치')
     mpl.rc('font', size=15)
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
     fig.set_size_inches(18, 13)
@@ -151,7 +187,7 @@ elif mnu == '시각화':
 
     st.pyplot()
 
-    st.write('근무일, 공휴일, 요일, 계절, 날씨에 따른 시간대별 평균 대여 수량')
+    st.markdown('- 근무일, 공휴일, 요일, 계절, 날씨에 따른 시간대별 평균 대여 수량')
     mpl.rc('font', size=8)
     fig, axes = plt.subplots(nrows=5)
     plt.tight_layout()
@@ -164,7 +200,7 @@ elif mnu == '시각화':
     sns.pointplot(x='hour', y='count', data=train, hue='weather', ax=axes[4])
     st.pyplot()
 
-    st.write('온도, 체감 온도, 픙속, 습도별 대여 수량 산점도 그래프')
+    st.markdown('- 온도, 체감 온도, 픙속, 습도별 대여 수량 산점도 그래프')
     mpl.rc('font', size=12)
     fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
     plt.tight_layout()
@@ -175,7 +211,7 @@ elif mnu == '시각화':
     sns.regplot(x="humidity", y="count", data=train, ax=ax4, scatter_kws={'alpha':0.2}, line_kws={'color':'blue'})
     st.pyplot()
 
-    st.write('피처 간 상관관계 매트릭스')
+    st.markdown('- 피처 간 상관관계 매트릭스')
     corrMat = train[['temp', 'atemp', 'humidity', 'windspeed', 'count']].corr()
     fig, ax = plt.subplots()
     fig.set_size_inches(10, 10)
@@ -191,8 +227,15 @@ elif mnu == '시각화':
     st.markdown('**3. 파생피처 추가:** datetime 에 숨어 있는 또 다른 정보인 요일(weekday) 피처를 추가한다.')
     st.markdown('**4. 피처 제거:** 테스트 데이터에 없는 피처는 훈련에 사용해도 큰 의미가 없다. '
                 '따라서 훈련 데이터에만 있는 casual과 registered 피처는 제거한다.')
-    st.markdown('**5. datetime 피처는 인덱스 역할만 하므로 타깃값 예측에 아무런 도움이 되지 않는다.')
-    st.markdown('**5. datetime 피처는 인덱스 역할만 하므로 타깃값 예측에 아무런 도움이 되지 않는다.')
+    st.markdown('**5. 피처 제거:** datetime 피처는 인덱스 역할만 하므로 타깃값 예측에 아무런 도움이 되지 않는다.')
+    st.markdown('**6. 피처 제거:** date 피처가 제공하는 정보도 year, month, day 피처에 담겨 있다.')
+    st.markdown('**7. 피처 제거:** month는 season 피처의 세부 분류로 볼 수 있다. '
+                '데이터가 지나치게 세분화되어 있으면 분류별 데이터수가 적어서 학습에 오히려 방해가 되기도 한다.')
+    st.markdown('**8. 피처 제거:** 막대 그래프 확인 결과 day는 분별력이 없다.')
+    st.markdown('**9. 피처 제거:** 막대 그래프 확인 결과 minute와 second에는 아무런 정보가 담겨 있지 않다.')
+    st.markdown('**10. 이상치 제거:** 포인트 플롯 확인 결과 weather가 4인 데이터는 이상치이다.')
+    st.markdown('**11. 피처 제거:** 산점도 그래프와 히트맵 확인 결과 '
+                'windspeed 피처에는 결측값이 많고 대여 수량과의 상관관계가 매우 약하다.')
 
 elif mnu == '모델링':
 
