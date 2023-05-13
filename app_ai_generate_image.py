@@ -12,7 +12,7 @@ def generate():
     # login -> https://platform.openai.com/account/api-keys
     # create new secret key 버튼 클릭
 
-    openai.api_key = "your key"
+    openai.api_key = "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"
     user_prompt = st.session_state['prompt']
     user_prompt += "in style: " + st.session_state['img_style']
 
