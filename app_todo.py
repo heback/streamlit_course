@@ -1,14 +1,15 @@
 import streamlit as st
 import datetime
 from todo import TodoDB
-# pip install email-validator
+# 패키지 설치 email-validator
 from email_validator import validate_email, EmailNotValidError
 import re
 import pandas as pd
 
-# DB 객체 생성, 연결
+# DB 객체 생성
 db = TodoDB()
-db.connectToDatabase()
+# DB 연결
+TodoDB.connectToDatabase()
 
 # streamlit 설정: layout="wide" -> 넓은 화면 사용
 st.set_page_config(layout="wide")
@@ -82,6 +83,10 @@ if menu == '회원가입':
         # 데이터베이스에서 회원 정보 가져오기
         users = db.readUsers()
 
+        def delete_user(*args, **kargs):
+            db.deleteUser(args[0])
+
+
         for user in users:
 
             title = user[1]+'('+ user[3] + ')'
@@ -90,7 +95,7 @@ if menu == '회원가입':
                 st.write(f'{user[2]}')
                 st.write(f'{user[6]}')
                 st.write(f'{user[7][:19]}')
-
+                st.button('삭제', on_click=delete_user, args=(user[0],), key='del'+str(user[0]))
 
 elif menu == '할일':
 
