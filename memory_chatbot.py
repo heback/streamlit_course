@@ -11,8 +11,9 @@ from langchain.chains import ConversationChain
 from langchain.chains.conversation.memory import ConversationEntityMemory
 from langchain.chains.conversation.prompt import ENTITY_MEMORY_CONVERSATION_TEMPLATE
 from langchain.llms import OpenAI
+from langchain.chat_models import ChatOpenAI
 
-api_key = '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'
+api_key = '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'
 
 # Set Streamlit page configuration
 st.set_page_config(page_title='🧠MemoryBot🤖', layout='wide')
