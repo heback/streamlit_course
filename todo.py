@@ -13,7 +13,7 @@ class TodoDB:
     @staticmethod # 클래스 메서드임을 알리는 decorator
     def connectToDatabase():
         try: # try ~ except
-            # 데이터베이스 연결, todo.db가 없으면 새로 생성해서 연결
+            # 데이터베이스 연결, DB가 없으면 새로 생성해서 연결
             # check_same_thread=False : 다중 접속을 허용
             TodoDB.con = sqlite3.connect('todo.db', check_same_thread=False)
 
