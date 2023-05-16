@@ -40,7 +40,7 @@ st.title('Bike Sharing Demand')
 mnu = st.sidebar.selectbox('메뉴', options=['설명', 'EDA', '시각화', '모델링'])
 
 if mnu == '설명':
-    st.subheader('설명')
+    st.subheader('요구사항')
     st.write('''
     자전거 공유 시스템은 회원 가입, 대여 및 자전거 반납 프로세스가 도시 전역의 키오스크 위치 네트워크를 통해 자동화되는 자전거 대여 수단입니다. 
     이러한 시스템을 사용하여 사람들은 한 위치에서 자전거를 빌리고 필요에 따라 다른 위치에 반납할 수 있습니다. 
@@ -57,21 +57,22 @@ if mnu == '설명':
     대여 기간 전에 사용할 수 있는 정보만 사용하여 테스트 세트에서 다루는 각 시간 동안 대여한 총 자전거 수를 예측해야 합니다.''')
     st.image('https://storage.googleapis.com/kaggle-competitions/kaggle/3948/media/bikes.png')
     st.markdown('#### 데이터 필드')
-    st.markdown('**datetime** - 시간별 날짜 + 타임스탬프')
-    st.markdown('**season** - 1 = 봄, 2 = 여름, 3 = 가을, 4 = 겨울')
-    st.markdown('**holiday** - 해당 요일을 휴일')
-    st.markdown('**workingday** - 요일이 주말이나 휴일')
-    st.markdown('**weather** - 1: 맑음, 약간 구름, 부분 흐림, 부분 흐림')
-    st.markdown('2: 안개 + 흐림, 안개 + 부서진 구름, 안개 + 약간 구름, 안개')
-    st.markdown('3: 가벼운 눈, 약한 비 + 뇌우 + 흩어진 구름, 약한 비 + 흩어진 구름')
-    st.markdown('4: 폭우 + 얼음 팔레트 + 뇌우 + 안개, 눈 + 안개')
-    st.markdown('**temp** - 온도(섭씨)')
+    st.markdown('**datetime** - 기록 일시(1시간 간격)')
+    st.markdown('**season** - 계절(1: 봄, 2: 여름, 3: 가을, 4: 겨울)')
+    st.markdown('**holiday** - 공휴일 여부(0: 공휴일 아님, 1: 공휴일)')
+    st.markdown('**workingday** - 근무일 여부(0: 근무일 아님, 1: 근무일)')
+    st.markdown('**weather** - 날씨')
+    st.markdown('&emsp;1: 맑음')
+    st.markdown('&emsp;2: 옅은 안개, 약간 흐림')
+    st.markdown('&emsp;3: 약간의 눈, 약간의 비와 천둥번개, 흐림')
+    st.markdown('&emsp;4: 폭우와 천둥번개, 눈과 짙은 안개')
+    st.markdown('**temp** - 실제 온도(섭씨)')
     st.markdown('**atemp** - 체감 온도(섭씨)')
-    st.markdown('**humidity** - 상대습도')
+    st.markdown('**humidity** - 상대 습도')
     st.markdown('**windspeed** - 풍속')
-    st.markdown('**casual** - 미등록 사용자 대여수')
-    st.markdown('**registered** - 등록 사용자 대여수')
-    st.markdown('**count** - 총 대여수')
+    st.markdown('**casual** - 등록되지 않은 사용자(비회원) 수')
+    st.markdown('**registered** - 등록된 사용자(회원) 수')
+    st.markdown('**count** - 자전거 대여량')
 
 elif mnu == 'EDA':
 
@@ -240,9 +241,9 @@ elif mnu == '시각화':
 elif mnu == '모델링':
 
     data_path = 'bike_sharing_demand/'
-    train = pd.read_csv(data_path + 'train.csv', parse_dates=['datetime'])
-    test = pd.read_csv(data_path + 'test.csv', parse_dates=['datetime'])
-    submission = pd.read_csv(data_path + 'sampleSubmission.csv', parse_dates=['datetime'])
+    train = pd.read_csv(data_path + 'train.csv')
+    test = pd.read_csv(data_path + 'test.csv')
+    submission = pd.read_csv(data_path + 'sampleSubmission.csv')
 
     st.markdown('#### 피처 엔지니어링')
     st.markdown('**이상치 제거**')
@@ -252,11 +253,164 @@ elif mnu == '모델링':
 
     st.markdown('**데이터 합치기**')
     st.write('훈련 데이터와 테스트 데이터에 같은 피처 엔지니어링을 적용하기 위해 두 데이터를 합친다.')
-    all_data_temp = pd.concat([train, test], ignore_index=True)
-    st.code("all_data_temp = pd.concat([train, test])")
+    all_data = pd.concat([train, test], ignore_index=True)
+    st.code("all_data = pd.concat([train, test])")
 
-    st.dataframe(all_data_temp)
+    st.dataframe(all_data)
 
+    st.markdown('**파생 피처 추가**')
 
+    all_data['date'] = all_data['datetime'].apply(lambda x: x.split()[0])
+    all_data['year'] = all_data['datetime'].apply(lambda x: x.split()[0].split('-')[0])
+    all_data['month'] = all_data['datetime'].apply(lambda x: x.split()[0].split('-')[1])
+    all_data['hour'] = all_data['datetime'].apply(lambda x: x.split()[1].split(':')[0])
+    all_data['weekday'] = all_data['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').weekday())
+    st.code('''
+    # 날짜 피처 생성
+    all_data['date'] = all_data['datetime'].apply(lambda x: x.split()[0])
+    # 연도 피처 생성
+    all_data['year'] = all_data['datetime'].apply(lambda x: x.split()[0].split('-')[0])
+    # 월 피처 생성
+    all_data['month'] = all_data['datetime'].apply(lambda x: x.split()[0].split('-')[1])
+    # 시간 피처 생성
+    all_data['hour'] = all_data['datetime'].apply(lambda x: x.split()[1].split(':')[0])
+    # 요일 피처 생성
+    all_data['weekday'] = all_data['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d').weekday())
+    ''')
+    st.write('훈련데이터는 매달 1일부터 19일까지의 기록이고, 테스트 데이터는 매달 20일부터 월말까지의 기록이다. '
+             '그러므로 대여 수량을 예측할 때 일(day) 피처는 사용할 필요가 없다. minute와 second 피처도 '
+             '모든 기록이 같은 값이므로 예측에 사용할 필요가 없다.')
 
+    st.markdown('**필요 없는 피처 제거**')
+    drop_features = ['casual', 'registered', 'datetime', 'date', 'windspeed', 'month']
+    all_data = all_data.drop(drop_features, axis=1)
+
+    st.code('''
+    drop_features = ['casual', 'registered', 'datetime', 'date', 'windspeed', 'month']
+    all_data = all_data.drop(drop_features, axis=1)
+    ''')
+
+    st.markdown('**피처 선택이란?**  ')
+    st.markdown('모델링 시 데이터의 특징을 잘 나타내는 주요 피처만 선택하는 작업을 **피처 선택(feature selection)** 이라고 한다.')
+    st.markdown('피처 선택은 머신러닝 모델 성능에 큰 영향을 준다. 타깃값 예측과 관련없는 피처가 많다면 오히려 성능이 떨어진다.')
+
+    st.markdown('**데이터 나누기**')
+
+    train = all_data[~pd.isnull(all_data['count'])]
+    test = all_data[pd.isnull(all_data['count'])]
+
+    X_train = train.drop(['count'], axis=1)
+    X_test = test.drop(['count'], axis=1)
+    Y_train = train['count']
+
+    st.code('''
+    train = all_data[~pd.isnull(all_data['count'])]
+    test = all_data[pd.isnull(all_data['count'])]
     
+    X_train = train.drop(['count'], axis=1)
+    X_test = test.drop(['count'], axis=1)
+    Y_train = train['count']
+    ''')
+
+    st.dataframe(X_train.head())
+
+    st.markdown('#### 평가지표 계산 함수 작성')
+    st.write('머신러닝 훈련이 제대로 이루어졌는지 확인하려면 대상 능력을 평가할 수단, 즉 평가지표가 필요하다.')
+    st.write('요구한 평가지표인 RMSLE를 계산하는 함수부터 만든다.')
+    st.markdown('$\displaystyle\sqrt{{1\over{N}}\sum_{i=1}^{N}(\log{(y_{i}+1)}-\log{(y_{i}+1)})^2}$')
+    import numpy as np
+
+    def rmsle(y_true, y_pred, convertExp=True):
+
+        if convertExp:
+            y_true = np.exp(y_true)
+            y_pred = np.exp((y_pred))
+
+        log_true = np.nan_to_num(np.log(y_true+1))
+        log_pred = np.nan_to_num(np.log(y_pred+1))
+
+        output = np.sqrt(np.mean((log_true - log_pred)**2))
+        return output
+
+    st.code('''
+    import numpy as np
+
+    def rmsle(y_true, y_pred, convertExp=True):
+
+        if convertExp:
+            y_true = np.exp(y_true)
+            y_pred = np.exp((y_pred))
+
+        log_true = np.nan_to_num(np.log(y_true+1))
+        log_pred = np.nan_to_num(np.log(y_pred+1))
+
+        output = np.sqrt(np.mean((log_true - log_pred)**2))
+        return output
+    ''')
+
+    st.markdown('#### 모델 훈련')
+
+    st.write('사이킷런이 제공하는 가장 간단한 선형 회귀 모델인 **LinearRegression 모델** 을 사용한다.')
+    st.write('선형회귀에 대한 개념 이해 하려면 아래 링크의 문서를 읽어 보기 바란다.')
+    st.markdown('[위키피디아: 선형회귀](https://ko.wikipedia.org/wiki/%EC%84%A0%ED%98%95_%ED%9A%8C%EA%B7%80)')
+    st.write('선형회귀는 값을 예측하는 경우 주로 사용된다.')
+
+    from sklearn.linear_model import LinearRegression
+
+    linear_reg_model = LinearRegression()
+
+    log_y = np.log(Y_train)
+    linear_reg_model.fit(X_train, log_y)
+
+    st.code('''
+    from sklearn.linear_model import LinearRegression
+    
+    linear_reg_model = LinearRegression()
+    
+    log_y = np.log(Y_train) # 타깃값 로그 변환
+    linear_reg_model.fit(X_train, log_y) # 모델 훈련
+    ''')
+    st.markdown('')
+    st.markdown('확실하게 짚어보고 갑시다.')
+    st.markdown('---')
+    st.markdown('**훈련 :** 피처(독립변수)와 타깃값(종속변수)이 주어졌을 때 최적의 가중치(회귀계수)를 찾는 과정')
+    st.markdown('**예측 :** 최적의 가중치를 아는 상태(훈련된 모델)에서 새로운 독립변수(데이터)가 주어졌을 때 타깃값을 추정하는 과정')
+
+    st.markdown('')
+    st.markdown('**탐색적 데이터 분석 :** 예측에 도움이 될 피처를 추리고, 적절한 모델링 방법을 탐색하는 과정')
+    st.markdown('**피처 엔지니어링 :** 추려진 피처들을 훈련에 적합하도록, 성능 향상에 도움되도록 가공하는 과정')
+    st.markdown('---')
+
+    st.markdown('#### 모델 성능 검증')
+
+    preds = linear_reg_model.predict(X_train)
+    rmsle_value = rmsle(log_y, preds, True)
+
+    st.code('''
+    preds = linear_reg_model.predict(X_train)
+    rmsle_value = rmsle(log_y, preds, True)
+    ''')
+
+    st.write(f'선형 회귀의 RSMLE 값: {rmsle_value:.4f}')
+
+    st.write('')
+    st.markdown('#### 예측 및 결과 제출')
+
+    st.write('1. 테스트 데이터로 예측한 결과를 이용해야 한다.')
+    st.write('2. 에측한 값에 지수변환을 해줘야 한다.')
+
+    lineararg_preds = linear_reg_model.predict(X_test)
+    submission['count'] = np.exp(lineararg_preds)
+    submission.to_csv('submission.csv', index=False)
+
+    st.code('''
+    # 테스트 데이터로 예측
+    lineararg_preds = linear_reg_model.predict(X_test)
+    # 지수 변환
+    submission['count'] = np.exp(lineararg_preds)
+    # 파일로 저장
+    submission.to_csv('submission.csv', index=False)
+    ''')
+
+    df_s = pd.read_csv('submission.csv')
+    st.dataframe(df_s)
