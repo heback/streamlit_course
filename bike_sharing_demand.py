@@ -397,7 +397,7 @@ elif mnu == '모델링':
     st.markdown('#### 예측 및 결과 제출')
 
     st.write('1. 테스트 데이터로 예측한 결과를 이용해야 한다.')
-    st.write('2. 에측한 값에 지수변환을 해줘야 한다.')
+    st.write('2. 예측한 값에 지수변환을 해줘야 한다.')
 
     lineararg_preds = linear_reg_model.predict(X_test)
     submission['count'] = np.exp(lineararg_preds)
@@ -414,3 +414,135 @@ elif mnu == '모델링':
 
     df_s = pd.read_csv('submission.csv')
     st.dataframe(df_s)
+
+    st.markdown('#### 성능 개선 : 랜덤 포레스트 회귀 모델')
+
+    st.write('랜덤 포레스트 회귀 모델은 훈련 데이터를 랜덤하게 샘플링한 모델 n개를 각각 훈련하여 결과를 평균하는 방법이다.')
+
+    st.markdown('##### 하이퍼파라미터 최적화(모델 훈련)')
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.model_selection import GridSearchCV
+    from sklearn import metrics
+
+    # 모델 생성
+    randomforest_model = RandomForestRegressor()
+
+    # 하이퍼파라미터
+    rf_params = {
+        'random_state': [42],
+        'n_estimators': [100, 120, 140]
+    }
+
+    # 평가 지표
+    rmsle_scorer = metrics.make_scorer(rmsle, greater_is_better=False)
+
+    st.write('**그리드서치 객체 생성**')
+    st.write('그리드서치는 하이퍼파라미터의 값을 바꿔가며 모델의 성능을 교차 검증으로 평가해 '
+             '최적의 하이퍼파라미터 값을 찾아준다.')
+    st.write('- 비교 검증해볼 하이퍼파라미터 목록')
+    st.write('- 대상 모델')
+    st.write('- 교차 검증용 평가 수단(평가 함수)')
+
+    # 그리드서치 객체 생성
+    gridsearch_random_forest_model = GridSearchCV(
+        estimator=randomforest_model, # 모델
+        param_grid=rf_params, # 딕셔너리 형태의 하이퍼파라미터
+        scoring=rmsle_scorer, # 평가지표
+        cv=5 # 교차 검증 분할 개수(기본값: 5)
+    )
+
+    # 그리드서치 수행
+    log_y = np.log(Y_train)
+    gridsearch_random_forest_model.fit(X_train, log_y)
+
+    st.code('''
+    from sklearn.ensemble import RandomForestRegressor
+    from sklearn.model_selection import GridSearchCV
+    from sklearn import metrics
+
+    # 모델 생성
+    randomforest_model = RandomForestRegressor()
+
+    # 하이퍼파라미터
+    rf_params = {
+        'random_state': [42],
+        'n_estimators': [100, 120, 140]
+    }
+
+    # 평가 지표
+    rmsle_scorer = metrics.make_scorer(rmsle, greater_is_better=False)
+
+    # 그리드서치 객체 생성
+    gridsearch_random_forest_model = GridSearchCV(
+        estimator=randomforest_model, # 모델
+        param_grid=rf_params, # 딕셔너리 형태의 하이퍼파라미터
+        scoring=rmsle_scorer, # 평가지표
+        cv=5 # 교차 검증 분할 개수(기본값: 5)
+    )
+
+    # 그리드서치 수행
+    log_y = np.log(Y_train)
+    gridsearch_random_forest_model.fit(X_train, log_y)
+
+    st.write(f'최적의 하이퍼파라미터 : {gridsearch_random_forest_model.best_params_}')
+    ''')
+
+    st.write(f'최적의 하이퍼파라미터 : {gridsearch_random_forest_model.best_params_}')
+
+    st.markdown('##### 모델 성능 검증')
+
+    st.code('''
+    # 예측
+    preds = gridsearch_random_forest_model.best_estimator_.predict(X_train)
+
+    # 평가
+    st.write(f'랜덤 포레스트 회귀 RMSLE 값 : {rmsle(log_y, preds, True):.4f}')
+    ''')
+
+    # 예측
+    preds = gridsearch_random_forest_model.best_estimator_.predict(X_train)
+
+    # 평가
+    st.write(f'랜덤 포레스트 회귀 RMSLE 값 : {rmsle(log_y, preds, True):.4f}')
+
+    st.markdown('##### 예측 및 결과 재출')
+
+    st.code('''
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+
+    randomforest_preds = gridsearch_random_forest_model.best_estimator_.predict(X_test)
+
+    figure, axes = plt.subplots(ncols=2)
+    figure.set_size_inches(10, 4)
+
+    sns.histplot(Y_train, bins=50, ax=axes[0])
+    axes[0].set_title('Train Data Distribution')
+
+    sns.histplot(np.exp(randomforest_preds), bins=50, ax=axes[1])
+    axes[1].set_title('Predicted Test Data Distribution')
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.pyplot()
+
+    submission['count'] = np.exp(randomforest_preds)
+    submission.to_csv('submission.csv', index=False)
+    ''')
+
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+
+    randomforest_preds = gridsearch_random_forest_model.best_estimator_.predict(X_test)
+
+    figure, axes = plt.subplots(ncols=2)
+    figure.set_size_inches(10, 4)
+
+    sns.histplot(Y_train, bins=50, ax=axes[0])
+    axes[0].set_title('Train Data Distribution')
+
+    sns.histplot(np.exp(randomforest_preds), bins=50, ax=axes[1])
+    axes[1].set_title('Predicted Test Data Distribution')
+    st.set_option('deprecation.showPyplotGlobalUse', False)
+    st.pyplot()
+
+    submission['count'] = np.exp(randomforest_preds)
+    submission.to_csv('submission.csv', index=False)
