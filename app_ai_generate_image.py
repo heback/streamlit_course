@@ -1,18 +1,12 @@
 import streamlit as st
-import os
 import openai
-from PIL import Image, ImageTk
+from PIL import Image
 import requests, io
 
 
 def generate():
 
-    # api_key 얻는 방법
-    # https://platform.openai.com/overview 접속
-    # login -> https://platform.openai.com/account/api-keys
-    # create new secret key 버튼 클릭
-
-    openai.api_key = "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"
+    openai.api_key = "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"
     user_prompt = st.session_state['prompt']
     user_prompt += "in style: " + st.session_state['img_style']
 
